@@ -1,3 +1,9 @@
 .sites-runtime/
 node_modules/
 *.zip
+
+.wrangler/
+.env
+.env.*
+.dev.vars
+

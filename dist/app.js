@@ -11,9 +11,15 @@ function showStep(next) {
   document.querySelector('.progress>span').style.width = `${(step+1)*25}%`;
   document.querySelector('#back').hidden = step === 0;
   document.querySelector('#form-hint').hidden = step !== 0;
-  document.querySelector('#next-label').textContent = step === 3 ? 'Quero meu roteiro de safári' : 'Continuar';
+  form.querySelector('button[type="submit"]').hidden = step !== 3;
   fields[step].querySelector('legend').focus({preventScroll:true});
 }
+form.querySelectorAll('.answer').forEach(answer=>answer.addEventListener('click',()=>{
+  const currentField = fields[step];
+  if(step >= 3 || !currentField.contains(answer)) return;
+  currentField.querySelectorAll('.answer').forEach(option=>option.setAttribute('aria-pressed',String(option === answer)));
+  showStep(step+1);
+}));
 document.querySelector('#back').addEventListener('click',()=>showStep(step-1));
 const nameInput = document.querySelector('#name');
 const phoneInput = document.querySelector('#phone');
@@ -21,9 +27,8 @@ nameInput.addEventListener('input',()=>nameInput.setCustomValidity(nameInput.val
 phoneInput.addEventListener('input',()=>{const digits=phoneInput.value.replace(/\D/g,'');phoneInput.setCustomValidity(digits.length < 10 || digits.length > 15 ? 'Informe um WhatsApp válido com DDD.' : '');});
 form.addEventListener('submit',event=>{
   event.preventDefault();
-  if(!form.reportValidity()) return;
-  if(step<3){showStep(step+1);return;}
-  const selected = name => form.querySelector(`input[name="${name}"]:checked`).value;
+  if(step !== 3 || !form.reportValidity()) return;
+  const selected = name => form.querySelector(`button[name="${name}"][aria-pressed="true"]`).value;
   const message = `Olá, Carlos! Quero meu roteiro de safári pela MiraTerra.\n\nNome: ${nameInput.value.trim()}\nWhatsApp: ${phoneInput.value.trim()}\nExperiência: ${selected('experience')}\nQuando pretendo viajar: ${selected('when')}\nPassagens: ${selected('tickets')}`;
   const url = `https://wa.me/5561981784728?text=${encodeURIComponent(message)}`;
   document.querySelector('#whatsapp-link').href = url;
